@@ -1,9 +1,10 @@
 # Domain Adpatation For Electromagnetic Imaging.
 
-This repository contains the support code for building complex domain adaptation network for electromagentic imaging proposed in:
+This repository contains the support code for building complex domain adaptation network for electromagentic imaging proposed by:
 
 ```
-filler.
+Ahmed Al-Saffar, Alina Bialkowski, Member, IEEE, Mahsa Baktashmotlagh, Adnan Trakic, Member, IEEE,
+Lei Guo, Member, IEEE, Amin Abbosh, Senior Member, IEEE
 ```
 
 ## Installation
@@ -33,7 +34,8 @@ cd emi_da;
 
 * `lib.py` has the helper functions for building the model.
 * `toolbox.py` has a large accessory functions for various purposes.
-* `.py` has the model.
+* `DA-Complex.py` has the model designed and the training procedure along with scheduling.
+    * It also gives an example of how the final saved model can be imported from `ResultModels` and infer with it.
 
 
 ## DATA
@@ -41,7 +43,7 @@ cd emi_da;
 Data and Final saved models can be found seprarately outside this repository [here](https://drive.google.com/drive/folders/11QoRjUuBUjZLF9eTdL0cz9PmasKIxv-w?usp=sharing)
 
 * Those folders must be downloaded and added to the repository.
-* `data` folder contains the processed data from source domain and target domain. One can experiment with DA seprately with this data. 
+* `data` folder contains the clean and processed data from source domain and target domain. One can experiment with DA seprately with this data. 
     * All details of hardware used to collect target data are abstracted away.
     * All details of simulations used to collect source data are abstracted away.
 * `ResultModels` folder contain saved models of DANN.
