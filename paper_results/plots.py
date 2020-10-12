@@ -1,12 +1,13 @@
 import numpy as np
 from scipy.io import loadmat
 import pandas as pd
-import os
 from glob import glob
 from scipy.signal import savgol_filter
 import matplotlib.pyplot as plt
 from matplotlib import rc
 
+
+#%% Setting up matplotlib
 rc('font', **{'family': 'serif', 'serif': ['Computer Modern']})
 rc('text', usetex=True)
 size = 20
@@ -18,11 +19,10 @@ plt.rc('legend', fontsize=15)
 # plt.rcParams['text.latex.unicode'] = True
 # plt.style.use('fivethirtyeight')
 
-pc = os.getcwd().split('\\')[2]
-results_path = rf"C:\Users\{pc}\OneDrive - The University of Queensland\UQ\MyP\SRD\\resources/"
-print(results_path)
+#%%
 
-path_to_data = rf'C:\Users\{pc}\OneDrive - The University of Queensland\UQ\MyP\plots_data\real_vs_complex'
+results_path = rf".\tmp"
+path_to_data = rf'.\plots_data\real_vs_complex'
 files = glob(path_to_data + '/*')
 data = []
 for afile in files:
@@ -168,7 +168,7 @@ higher resolution (300 * 300) instead of the dataset that we really worked with 
 
 epr_database, sig_database = None, None
 
-path_to_data = r'C:\Users\s4551072\OneDrive - The University of Queensland\WorkData\ml_stroke_localisation-master\data'
+path_to_data = r'.\ml_stroke_localisation-master\data'
 files = glob(path_to_data + '/*')
 for a_file in files:
     data = loadmat(a_file)
@@ -247,3 +247,32 @@ fig.set_facecolor('none')
 fig.savefig(f'{results_path}simulations_sample.png', bbox_inches='tight', pad_inches=0.5)
 
 print(f'{results_path}simulations_sample.png')
+
+#%% Plotting properties of blood and brain.
+
+import toolbox as tb
+tmp = r"G:\emvision\Head_Phantoms\Fabricated\20180709-liquidphantomto test the system-BM\bloodtargetmaterls.csv"
+blood = tb.pd.read_csv(tmp, skiprows=12)
+tmp = r"G:\emvision\Head_Phantoms\Fabricated\20180709-liquidphantomto test the system-BM\liquidphantom-test-system.csv"
+phantom = tb.pd.read_csv(tmp, skiprows=12)
+colors = tb.Cycle(plt.rcParams['axes.prop_cycle'].by_key()['color'])
+
+fig, ax1 = plt.subplots(figsize=(11, 8))
+color = 'tab:red'
+ax1.set_xlabel('Frequency (GHz)')
+ax1.set_ylabel('Relative Permittivity')
+# ax1.tick_params(axis='y', labelcolor=color)
+ax2 = ax1.twinx()  # instantiate a second axes that shares the same x-axis
+ax2.set_ylabel('Conductivity (S/m)')
+ax1.plot(blood['frequency(Hz)'] / 1e9, blood["e'"], color=colors.next(),
+         label='Blood emulating fluid permittivity')
+ax1.plot(phantom['frequency(Hz)'] / 1e9, phantom["e'"], color=colors.next(),
+         label='Brain emulating fluid permittivity')
+ax2.plot(blood['frequency(Hz)'] / 1e9, blood["e''/e'"] * blood["e'"] * 2 * np.pi * blood['frequency(Hz)'] * 8.851e-12,
+         color=colors.next(), label='Blood emulating fluid conductivity')
+ax2.plot(phantom['frequency(Hz)'] / 1e9, phantom["e''/e'"] * phantom["e'"] * 2 * np.pi * phantom['frequency(Hz)'] * 8.851e-12,
+         color=colors.next(), label='Brain emulating fluid conductivity')
+ax1.legend(loc='lower right')
+ax2.legend(loc='best')
+tb.FigureManager.grid(ax1)
+fig.savefig("props.png", bbox_inches='tight', pad_inches=0.5)
