@@ -5,6 +5,7 @@ from glob import glob
 from scipy.signal import savgol_filter
 import matplotlib.pyplot as plt
 from matplotlib import rc
+import toolbox as tb
 
 
 #%% Setting up matplotlib
@@ -133,12 +134,7 @@ ax[1].set_xticklabels(np.round(ax[1].get_xticks(), 1), size=size)
 ax[1].set_yticklabels(np.round(ax[1].get_yticks(), 1), size=size)
 fig.savefig(results_path + 'nonsat.png', layout='tight', pad_inches=0.1, bbox_inches='tight')
 
-# CXE VS KLD: # See code @ V1-AllFreqConv2D, last cell
 
-# NonSat formulation of loss: See code @ PaperResults / plots / last cell
-# Vanilla MLP vs Multi-freq vs CV-NN See code @ PaperResults / plots
-# Softbinning See code @ Source Prepocessing in Headscanner Project, last cell
-# Simulation results vs Real data: See code @ Magnitude Processing in HeadScanner Project: last cell
 # %% # Real data strokes.
 path_to_15mm = r'G:\emvision\Platform\MeasurementData\20190528-GlyWater-CNC-AA-AS\TargetDia15\Photos'
 path_to_37mm = r'G:\emvision\Platform\MeasurementData\20190528-GlyWater-CNC-AA-AS\TargetDia37\Photos'
@@ -177,24 +173,7 @@ for a_file in files:
     print(name, eval(name).shape)
 
 i = 1
-style = 'Accent, Accent_r, Blues, Blues_r, BrBG, BrBG_r, BuGn, BuGn_r, BuPu, BuPu_r, CMRmap,' \
-        ' CMRmap_r, Dark2, Dark2_r, GnBu, GnBu_r, Greens, Greens_r, Greys, Greys_r, OrRd,' \
-        ' OrRd_r, Oranges, Oranges_r, PRGn, PRGn_r, Paired, Paired_r, Pastel1, Pastel1_r,' \
-        ' Pastel2, Pastel2_r, PiYG, PiYG_r, PuBu, PuBuGn, PuBuGn_r, PuBu_r, PuOr, PuOr_r,' \
-        ' PuRd, PuRd_r, Purples, Purples_r, RdBu, RdBu_r, RdGy, RdGy_r, RdPu, RdPu_r, RdYlBu,' \
-        ' RdYlBu_r, RdYlGn, RdYlGn_r, Reds, Reds_r, Set1, Set1_r, Set2, Set2_r, Set3, Set3_r,' \
-        ' Spectral, Spectral_r, Wistia, Wistia_r, YlGn, YlGnBu, YlGnBu_r, YlGn_r, YlOrBr,' \
-        ' YlOrBr_r, YlOrRd, YlOrRd_r, afmhot, afmhot_r, autumn, autumn_r, binary, binary_r,' \
-        ' bone, bone_r, brg, brg_r, bwr, bwr_r, cividis, cividis_r, cool, cool_r, coolwarm,' \
-        ' coolwarm_r, copper, copper_r, cubehelix, cubehelix_r, flag, flag_r, gist_earth, ' \
-        'gist_earth_r, gist_gray, gist_gray_r, gist_heat, gist_heat_r, gist_ncar, gist_ncar_r,' \
-        ' gist_rainbow, gist_rainbow_r, gist_stern, gist_stern_r, gist_yarg, gist_yarg_r,' \
-        ' gnuplot, gnuplot2, gnuplot2_r, gnuplot_r, gray, gray_r, hot, hot_r, hsv, hsv_r,' \
-        ' inferno, inferno_r, jet, jet_r, magma, magma_r, nipy_spectral, nipy_spectral_r,' \
-        ' ocean, ocean_r, pink, pink_r, plasma, plasma_r, prism, prism_r, rainbow, rainbow_r,' \
-        ' seismic, seismic_r, spring, spring_r, summer, summer_r, tab10, tab10_r, tab20, tab20_r,' \
-        ' tab20b, tab20b_r, tab20c, tab20c_r, terrain, terrain_r, twilight, twilight_r,' \
-        ' twilight_shifted, twilight_shifted_r, viridis, viridis_r, winter, winter_r'.replace(' ', '').split(',')
+style = plt.colormaps()
 N = len(style)
 fig = plt.figure(figsize=(20, 900))
 counter = 0
@@ -207,15 +186,6 @@ for k in range(N):
     ax.set_yticks([])
     counter += 1
 
-
-plt.style.use('default')
-rc('font', **{'family': 'serif', 'serif': ['Computer Modern']})
-rc('text', usetex=True)
-size = 20
-plt.rc('xtick', labelsize=size)
-plt.rc('ytick', labelsize=size)
-plt.rc('axes', labelsize=size)
-plt.rc('legend', fontsize=15)
 N = 4
 M = 2
 r = 800
@@ -250,12 +220,15 @@ print(f'{results_path}simulations_sample.png')
 
 #%% Plotting properties of blood and brain.
 
-import toolbox as tb
 tmp = r"G:\emvision\Head_Phantoms\Fabricated\20180709-liquidphantomto test the system-BM\bloodtargetmaterls.csv"
 blood = tb.pd.read_csv(tmp, skiprows=12)
 tmp = r"G:\emvision\Head_Phantoms\Fabricated\20180709-liquidphantomto test the system-BM\liquidphantom-test-system.csv"
 phantom = tb.pd.read_csv(tmp, skiprows=12)
 colors = tb.Cycle(plt.rcParams['axes.prop_cycle'].by_key()['color'])
+blood["e'"] = savgol_filter(blood["e'"], window_length=51, polyorder=3)
+blood["e''/e'"] = savgol_filter(blood["e''/e'"], window_length=51, polyorder=3)
+phantom["e'"] = savgol_filter(phantom["e'"], window_length=51, polyorder=3)
+phantom["e''/e'"] = savgol_filter(phantom["e''/e'"], window_length=51, polyorder=3)
 
 fig, ax1 = plt.subplots(figsize=(11, 8))
 color = 'tab:red'
@@ -264,15 +237,40 @@ ax1.set_ylabel('Relative Permittivity')
 # ax1.tick_params(axis='y', labelcolor=color)
 ax2 = ax1.twinx()  # instantiate a second axes that shares the same x-axis
 ax2.set_ylabel('Conductivity (S/m)')
-ax1.plot(blood['frequency(Hz)'] / 1e9, blood["e'"], color=colors.next(),
+step = 8
+x = blood['frequency(Hz)'] / 1e9
+y = blood["e'"]
+x = x[::step]
+y = y[::step]
+ax1.plot(x, y, color=colors.next(), linestyle=':', marker='^',
          label='Blood emulating fluid permittivity')
-ax1.plot(phantom['frequency(Hz)'] / 1e9, phantom["e'"], color=colors.next(),
+x = phantom['frequency(Hz)'] / 1e9
+y = phantom["e'"]
+x = x[::step]
+y = y[::step]
+ax1.plot(x, y, color=colors.next(), linestyle='--', marker='x',
          label='Brain emulating fluid permittivity')
-ax2.plot(blood['frequency(Hz)'] / 1e9, blood["e''/e'"] * blood["e'"] * 2 * np.pi * blood['frequency(Hz)'] * 8.851e-12,
+x = blood['frequency(Hz)'] / 1e9
+y = blood["e''/e'"] * blood["e'"] * 2 * np.pi * blood['frequency(Hz)'] * 8.851e-12
+x = x[::step]
+y = y[::step]
+ax2.plot(x, y, linestyle='-.', marker='s',
          color=colors.next(), label='Blood emulating fluid conductivity')
-ax2.plot(phantom['frequency(Hz)'] / 1e9, phantom["e''/e'"] * phantom["e'"] * 2 * np.pi * phantom['frequency(Hz)'] * 8.851e-12,
+x = phantom['frequency(Hz)'] / 1e9
+y = phantom["e''/e'"] * phantom["e'"] * 2 * np.pi * phantom['frequency(Hz)'] * 8.851e-12
+x = x[::step]
+y = y[::step]
+ax2.plot(x, y, linestyle='-.', marker='o',
          color=colors.next(), label='Brain emulating fluid conductivity')
 ax1.legend(loc='lower right')
 ax2.legend(loc='best')
 tb.FigureManager.grid(ax1)
-fig.savefig("props.png", bbox_inches='tight', pad_inches=0.5)
+fig.savefig("paper_results/resources/props.png", bbox_inches='tight', pad_inches=0.5)
+
+#%% Others
+
+# CXE VS KLD: # See code @ V1-AllFreqConv2D, last cell
+# Softbinning See code @ Source Prepocessing, last cell
+# Simulation results vs Real data: See code @ Magnitude: last cell
+
+

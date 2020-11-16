@@ -16,8 +16,8 @@ from torch.utils.tensorboard import SummaryWriter
 from torch.utils.data import Dataset, DataLoader, TensorDataset
 from sklearn.model_selection import train_test_split
 from itertools import cycle, count
-_, _, _, _, _, _ = optim, SummaryWriter, DataLoader, DataLoader, TensorDataset, Dataset
-_, _, _ = train_test_split, cycle, count
+_ = optim, SummaryWriter, DataLoader, DataLoader, TensorDataset, Dataset
+_ = train_test_split, cycle, count
 
 # ========================== Complex Activation Functions ====================================
 
@@ -211,6 +211,32 @@ def conv_output_shape(h_w=(30, 91), kernel_size=1, stride=1, padding=0, dilation
     h = floor(((h_w[0] + (2 * padding) - (dilation * (kernel_size[0] - 1)) - 1) / stride) + 1)
     w = floor(((h_w[1] + (2 * padding) - (dilation * (kernel_size[1] - 1)) - 1) / stride) + 1)
     return h, w
+
+
+class MMD:
+    def __init__(self, bw=1):
+        self.bw = bw
+
+    @staticmethod
+    def gaussian_kernel(a, b, bw=1):
+        """
+        """
+        # a and b can have different number of items but they have to have same shape per item.
+        # shape per item can be arbitrary.
+        # The task is to build a matrix of shape |a| x |b|
+        dim1_1, dim1_2 = a.shape[0], b.shape[0]
+        tmp = (dim1_1, 1,) + a.shape[1:]
+        print(tmp)
+        a = a.view(tmp)
+        b = b.view((1, dim1_2,) + b.shape[1:])
+        a_core = a.expand((dim1_1, dim1_2,) + a.shape[2:])
+        b_core = b.expand((dim1_1, dim1_2,) + a.shape[2:])
+        numerator = (a_core - b_core).pow(2).mean(dim=(0, 1), keepdim=True)
+        return t.exp(-numerator / (2 * bw))
+
+    def __call__(self, a, b):
+        return self.gaussian_kernel(a, a, self.bw).mean() + self.gaussian_kernel(b, b, self.bw).mean() -\
+               2 * self.gaussian_kernel(a, b, self.bw).mean()
 
 
 #%% ========================= Brain Injury Vizulaization tools ==================================

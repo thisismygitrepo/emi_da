@@ -1,13 +1,13 @@
 
 
 """
-
+Final Model
 """
 from abc import ABC
 import lib
 import torch as t
 import numpy as np
-import matplotlib.pyplot as plt
+# import matplotlib.pyplot as plt
 import toolbox as tb
 
 
@@ -39,6 +39,15 @@ dataset_source = lib.TensorDataset(x_source_train, y_source_train)
 dataset_target = lib.TensorDataset(x_target_train, y_target_train)
 dataloader_source = lib.DataLoader(dataset_source, batch_size=batch_size, num_workers=0)
 dataloader_target = lib.DataLoader(dataset_target, batch_size=batch_size, num_workers=0)
+
+
+#%% Estiamte the distance between the two distributions.
+
+x_source = t.tensor(x_source)
+y_source = t.tensor(y_source)
+lib.MMD.gaussian_kernel(x_source, y_source)
+loss = lib.MMD()
+loss(x_source, y_source)
 
 
 #%% Defining a NN
@@ -270,3 +279,30 @@ print(kld_loss, cxe_loss)  # this should give the performance declared in the pa
 predicted_labels, y_target_test = np.load('./ResultModels/da_target_predict_np.npy'),\
                                   np.load('./ResultModels/da_target_y_np.npy')
 predicted_labels, y_target_test = t.tensor(predicted_labels), t.tensor(y_target_test)
+
+
+#%% Estimation of discrepancy between source domain and target domain.
+
+my_net, _, _ = load_danned()
+
+x_source = t.tensor(x_source)
+x_target = t.tensor(x_target)
+loss = lib.MMD(bw=1)  # Maximum Mean Discrepency loss
+
+# discrepency before feature extractor
+loss_before = loss(x_source[:1000], x_target)  # should give 0.6328
+
+# discrepency after feature extractor
+code_source_real, code_source_imag = my_net.FE(x_source[:1000].to(device))
+code_source = t.stack([code_source_real, code_source_imag], dim=2)
+code_target_real, code_target_imag = my_net.FE(x_target.to(device))
+code_target = t.stack([code_target_real, code_target_imag], dim=2)
+loss_after = loss(code_source, code_target)  # should give 0.0259
+
+# Domain classifier quality after training. Pass 100 codes of source and target.
+metric = lib.Accuracy()
+res_t = my_net.DC((code_target_real[:100], code_target_imag[:100]))
+res_s = my_net.DC((code_source_real[:100], code_source_imag[:100]))
+source_domain = t.zeros(100, dtype=t.long).to(device)
+target_domain = t.ones(100, dtype=t.long).to(device)
+metric(t.cat([res_s, res_t], dim=0), t.cat([source_domain, target_domain], dim=0))  # should give 59%
