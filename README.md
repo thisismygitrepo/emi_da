@@ -29,8 +29,7 @@ cd emi_da;
 
 ## Running the Model
 
-
-# The repository is structured as follows:
+The repository is structured as follows:
 
 * `lib.py` has the helper functions for building the model.
 * `toolbox.py` has a large accessory functions for various purposes.
