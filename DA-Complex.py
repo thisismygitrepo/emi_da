@@ -8,7 +8,7 @@ import lib
 import torch as t
 import numpy as np
 # import matplotlib.pyplot as plt
-import toolbox as tb
+import alexlib.toolbox as tb
 
 
 #%% Load data

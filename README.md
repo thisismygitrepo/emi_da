@@ -13,6 +13,7 @@ Lei Guo, Member, IEEE, Amin Abbosh, Senior Member, IEEE
 
 The model proposed is implemented in Pytorch as uses serveral other libraries.
 
+* `alexlib`
 * `torch==1.6`
 * `numpy==1.16`
 * `matplotlib==1.5.1`
