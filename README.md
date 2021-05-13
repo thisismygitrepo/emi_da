@@ -24,7 +24,7 @@ Setup
 To install the package, simply clone the repository:
 
 ```
-git clone https://github.com/kernelized/emi_da;
+git clone https://github.com/thisismygitrepo/emi_da;
 cd emi_da;
 ```
 
